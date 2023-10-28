@@ -1,6 +1,6 @@
-# GELÉIA MISC
+# GELEIA MISC
 
-Monorepo para armazenar códigos criados nos encontros do GELÉIA.
+Monorepo para armazenar códigos criados nos encontros do GELEIA.
 
 Cada pasta tem o nome do assunto do tópico discutido, com a data de cada encontro a seguir:
 
