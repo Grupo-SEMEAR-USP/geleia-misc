@@ -2,34 +2,33 @@
 #define INCLUDE_GAMEPAD_MODULE
 #include <DabbleESP32.h>
 
-#define PONTE_H_MOTOR_A_DIRECAO_POS_PIN 8
-#define PONTE_H_MOTOR_A_DIRECAO_NEG_PIN 9
-#define PONTE_H_MOTOR_A_VELOCIDADE_PIN 10
-#define LED_MOTOR_A_ID 0
+#define MOTOR_A_DIRECAO_POS_PIN 8
+#define MOTOR_A_DIRECAO_NEG_PIN 9
+#define MOTOR_A_ENABLE_PIN 10
 
-#define PONTE_H_MOTOR_B_DIRECAO_POS_PIN 6
-#define PONTE_H_MOTOR_B_DIRECAO_NEG_PIN 7
-#define PONTE_H_MOTOR_B_VELOCIDADE_PIN 5
-#define LED_MOTOR_B_ID 1
+#define MOTOR_B_DIRECAO_POS_PIN 6
+#define MOTOR_B_DIRECAO_NEG_PIN 7
+#define MOTOR_B_ENABLE_PIN 5
 
-void setup() {
+void setup(){
   Dabble.begin("GELEIA");//Nome bluetooth para aparecer
-  ledcSetup(LED_MOTOR_A_ID, 500, 8);
-  ledcSetup(LED_MOTOR_B_ID, 500, 8);
 
   //Motor A
-  pinMode(PONTE_H_MOTOR_A_VELOCIDADE_PIN, OUTPUT);
-  pinMode(PONTE_H_MOTOR_A_DIRECAO_POS_PIN, OUTPUT);
-  pinMode(PONTE_H_MOTOR_A_DIRECAO_NEG_PIN, OUTPUT);
-  ledcAttachPin(PONTE_H_MOTOR_A_VELOCIDADE_PIN, LED_MOTOR_A_ID);
+  pinMode(MOTOR_A_ENABLE_PIN, OUTPUT);
+  pinMode(MOTOR_A_DIRECAO_POS_PIN, OUTPUT);
+  pinMode(MOTOR_A_DIRECAO_NEG_PIN, OUTPUT);
   //Motor B
-  pinMode(PONTE_H_MOTOR_B_VELOCIDADE_PIN, OUTPUT);
-  pinMode(PONTE_H_MOTOR_B_DIRECAO_POS_PIN, OUTPUT);
-  pinMode(PONTE_H_MOTOR_B_DIRECAO_NEG_PIN, OUTPUT);
-  ledcAttachPin(PONTE_H_MOTOR_B_VELOCIDADE_PIN, LED_MOTOR_B_ID);
+  pinMode(MOTOR_B_ENABLE_PIN, OUTPUT);
+  pinMode(MOTOR_B_DIRECAO_POS_PIN, OUTPUT);
+  pinMode(MOTOR_B_DIRECAO_NEG_PIN, OUTPUT);
 }
 
-void loop() {
+void send_command_to_motor(int vel, int pos_dir_pin, int neg_dir_pin, int enable_pin){
+  digitalWrite(pos_dir_pin, (vel > 0 ? HIGH : LOW));
+  digitalWrite(neg_dir_pin, (vel < 0 ? HIGH : LOW));
+  analogWrite(enable_pin, (vel < 0 ? -vel : vel));
+}
+void loop(){
   Dabble.processInput();
 
   float comandoMotorA = GamePad.getYaxisData() + GamePad.getXaxisData();
@@ -37,11 +36,9 @@ void loop() {
   int velMotorA = map(comandoMotorA, -10.00, 10.00, -255, 255);
   int velMotorB = map(comandoMotorB, -10.00, 10.00, -255, 255);
   //Motor A
-  digitalWrite(PONTE_H_MOTOR_A_DIRECAO_POS_PIN, (velMotorA > 0 ? HIGH : LOW));
-  digitalWrite(PONTE_H_MOTOR_A_DIRECAO_NEG_PIN, (velMotorA < 0 ? HIGH : LOW));
-  ledcWrite(LED_MOTOR_A_ID, (velMotorA < 0 ? -velMotorA : velMotorA));
+  send_command_to_motor(velMotorA,
+  			MOTOR_A_DIRECAO_POS_PIN, MOTOR_A_DIRECAO_NEG_PIN, MOTOR_A_ENABLE_PIN);
   //Motor B
-  digitalWrite(PONTE_H_MOTOR_B_DIRECAO_POS_PIN, (velMotorB > 0 ? HIGH : LOW));
-  digitalWrite(PONTE_H_MOTOR_B_DIRECAO_NEG_PIN, (velMotorB < 0 ? HIGH : LOW));
-  ledcWrite(LED_MOTOR_B_ID, (velMotorB < 0 ? -velMotorB : velMotorB));
+  send_command_to_motor(velMotorB,
+  			MOTOR_B_DIRECAO_POS_PIN, MOTOR_B_DIRECAO_NEG_PIN, MOTOR_B_ENABLE_PIN);
 }

@@ -8,5 +8,5 @@ profiles:
       - DabbleESP32 (1.5.1)
 
 default_profile: lolinc3
-default_port: /dev/ttyACM0
-default_protocol: serial
+#default_port: /dev/ttyACM0
+#default_protocol: serial
