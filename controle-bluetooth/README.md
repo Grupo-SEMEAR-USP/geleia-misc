@@ -1,0 +1,17 @@
+# Controle Bluetooth
+
+Uma continuacao do encontro anterior, esse código se refere ao resultado do encontro do dia 28/10/2023, em qual foi possível trocar o receiver de alguns robos do RMC pela esp32 programada.
+
+## Dependencias do código
+
+As dependencias desse código estao explicitas no arquivo [sketch.yaml](https://github.com/Grupo-SEMEAR-USP/geleia-misc/blob/main/controle-bluetooth/sketch.yaml) que segue nessa pasta, portanto se voce estiver usando [arduino-cli](https://arduino.github.io/arduino-cli/), só é necessário rodar o comando
+```bash
+arduino-cli compile
+```
+para compilar.
+
+Caso esteja usando o arduino IDE, eis o que voce precisa ter instalado (e em **qual versao**) para compilar esse código:
+- Boards:
+    - Board [ESP32 Lolin C3 Mini](https://docs.espressif.com/projects/arduino-esp32/en/latest/installing.html)
+- Dependencias:
+    - [DabbleESP32 (1.5.1)](https://www.arduino.cc/reference/en/libraries/dabbleesp32/)
