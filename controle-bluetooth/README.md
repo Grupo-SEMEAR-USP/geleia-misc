@@ -12,6 +12,6 @@ para compilar.
 
 Caso esteja usando o arduino IDE, eis o que voce precisa ter instalado (e em **qual versao**) para compilar esse código:
 - Boards:
-    - Board [ESP32 Lolin C3 Mini](https://docs.espressif.com/projects/arduino-esp32/en/latest/installing.html)
+    - Board [ESP32 Lolin C3 Mini](https://docs.espressif.com/projects/arduino-esp32/en/latest/installing.html) (2.0.13)
 - Bibliotecas:
     - [DabbleESP32 (1.5.1)](https://www.arduino.cc/reference/en/libraries/dabbleesp32/)
