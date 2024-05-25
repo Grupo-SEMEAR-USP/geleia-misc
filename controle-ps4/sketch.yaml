@@ -1,0 +1,13 @@
+profiles:
+  lolinc3:
+    fqbn: esp32:esp32:lolin_c3_mini
+    platforms:
+      - platform: esp32:esp32 (2.0.13)
+        platform_index_url: https://espressif.github.io/arduino-esp32/package_esp32_dev_index.json
+    libraries:
+      - ESP32Servo (1.2.1)
+      - PS4Controller (1.0.8)
+
+default_profile: lolinc3
+#default_port: /dev/ttyACM0
+#default_protocol: serial
