@@ -1,0 +1,140 @@
+* Juleska's Brushless Motor 
+.options chgtol=1e-11 abstol=10u
+
+.model switchp aswitch (r_on = .1 r_off = 1e5 cntl_on= .86 cntl_off= .84 log=TRUE limit=TRUE)
+.model switchn aswitch (r_on = .1 r_off = 1e5 cntl_on=-.86 cntl_off=-.84 log=TRUE limit=TRUE)
+.model dmod D (RS = 10)
+
+.param twopi = {2*3.141596}, A = 2, P = 3
+
+*--- Motor Parameters
+** Movement: Turnigy Aerodrive D3536/5 1450KV
+.param MInertia = 0.3 ; g*cm*sec*sec
+.param MInductance = 3mh, MResistance = 23 mOhm
+.param MCapToGND = 0.001uf
+.param MKVRPM = 1450 ; rpm / Volt
+.param MKV = {MKVRPM / 60} ; Hz / Volt
+.param MKT = {10/MKV } ; g*cm/amp
+
+** Weapon: Scorpion HK5-4020-850kv 
+.param WInertia = {1.118 * 10e5} ; g*cm*sec*sec
+.param WInductance = 3mh, WResistance = 26 mOhm
+.param WCapToGND = 0.001uf
+.param WKVRPM = 850 ; rpm / Volt
+.param WKV = {WKVRPM / 60} ; Hz / Volt
+.param WKT = {10/WKV} ; g*cm/amp
+*---------------
+
+*--- Motor Simulations ---
+** Movement Motor Right
+xMotorR mrp1 mrct mrp2 mrct mrp3 mrct mr_shaft_speed mr_shaft_angle bldcmtr
++ params: J={MInertia} CL={MInductance} CR={6} CC={MCapToGND}
++ Cb={.12} Ct={300}
+rmrct mrct 0 1 ;hook ct to ground through current measuring resistor
+** Right Motor ESC
+* Read Right Motor Position back
+Emrp1x mrp1x 0 VALUE = {V(on) * sin(A*V(mr_shaft_angle) - (1-1)*(twopi/P))}
+Emrp2x mrp2x 0 VALUE = {V(on) * sin(A*V(mr_shaft_angle) - (2-1)*(twopi/P))}
+Emrp3x mrp3x 0 VALUE = {V(on) * sin(A*V(mr_shaft_angle) - (3-1)*(twopi/P))}
+rmr1 mrp1x 0 1
+rmr2 mrp2x 0 1
+rmr3 mrp3x 0 1
+* ESC Switches
+Amr1p %v(mrp1x) %gd(mrppwr mrp1) switchp
+Amr1n %v(mrp1x) %gd(mrnpwr mrp1) switchn
+Amr2p %v(mrp2x) %gd(mrppwr mrp2) switchp
+Amr2n %v(mrp2x) %gd(mrnpwr mrp2) switchn
+Amr3p %v(mrp3x) %gd(mrppwr mrp3) switchp
+Amr3n %v(mrp3x) %gd(mrnpwr mrp3) switchn
+* Clamping diodes to keep the kickback voltage down
+Dmr1p mrp1 mrppwr dmod
+Dmr1n mrnpwr mrp1 dmod
+Dmr2p mrp2 mrppwr dmod
+Dmr2n mrnpwr mrp2 dmod
+Dmr3p mrp3 mrppwr dmod
+Dmr3n mrnpwr mrp3 dmod
+** Movement Motor Left
+xMotorL mlp1 mlct mlp2 mlct mlp3 mlct ml_shaft_speed ml_shaft_angle bldcmtr
++ params: J={MInertia} CL={MInductance} CR={MResistance} CC={MCapToGND}
++ Cb={1/WKV} Ct={WKT}
+rmlct mlct 0 1 ;hook ct to ground through current measuring resistor
+** Right Motor ESC
+* Read Right Motor Position back
+Emlp1x mlp1x 0 VALUE = {V(on) * sin(A*V(ml_shaft_angle) - (1-1)*(twopi/P))}
+Emlp2x mlp2x 0 VALUE = {V(on) * sin(A*V(ml_shaft_angle) - (2-1)*(twopi/P))}
+Emlp3x mlp3x 0 VALUE = {V(on) * sin(A*V(ml_shaft_angle) - (3-1)*(twopi/P))}
+rml1 mlp1x 0 1
+rml2 mlp2x 0 1
+rml3 mlp3x 0 1
+* ESC Switches
+Aml1p %v(mlp1x) %gd(mlppwr mlp1) switchp
+Aml1n %v(mlp1x) %gd(mlnpwr mlp1) switchn
+Aml2p %v(mlp2x) %gd(mlppwr mlp2) switchp
+Aml2n %v(mlp2x) %gd(mlnpwr mlp2) switchn
+Aml3p %v(mlp3x) %gd(mlppwr mlp3) switchp
+Aml3n %v(mlp3x) %gd(mlnpwr mlp3) switchn
+* Clamping diodes to keep the kickback voltage down
+Dml1p mlp1 mlppwr dmod
+Dml1n mlnpwr mlp1 dmod
+Dml2p mlp2 mlppwr dmod
+Dml2n mlnpwr mlp2 dmod
+Dml3p mlp3 mlppwr dmod
+Dml3n mlnpwr mlp3 dmod
+** Weapon Motor
+xWeapon wp1 wct wp2 wct wp3 wct w_shaft_speed w_shaft_angle bldcmtr
++ params: J={WInertia} CL={WInductance} CR={WResistance} CC={WCapToGND}
++ Cb={1/WKV} Ct={WKT}
+rwct wct 0 1 ;hook ct to ground through current measuring resistor
+** Right Motor ESC
+* Read Right Motor Position back
+Ewp1x wp1x 0 VALUE = {V(on) * sin(A*V(w_shaft_angle) - (1-1)*(twopi/P))}
+Ewp2x wp2x 0 VALUE = {V(on) * sin(A*V(w_shaft_angle) - (2-1)*(twopi/P))}
+Ewp3x wp3x 0 VALUE = {V(on) * sin(A*V(w_shaft_angle) - (3-1)*(twopi/P))}
+rw1 wp1x 0 1
+rw2 wp2x 0 1
+rw3 wp3x 0 1
+* ESC Switches
+Aw1p %v(wp1x) %gd(wppwr wp1) switchp
+Aw1n %v(wp1x) %gd(wnpwr wp1) switchn
+Aw2p %v(wp2x) %gd(wppwr wp2) switchp
+Aw2n %v(wp2x) %gd(wnpwr wp2) switchn
+Aw3p %v(wp3x) %gd(wppwr wp3) switchp
+Aw3n %v(wp3x) %gd(wnpwr wp3) switchn
+* Clamping diodes to keep the kickback voltage down
+Dw1p wp1 wppwr dmod
+Dw1n wnpwr wp1 dmod
+Dw2p wp2 wppwr dmod
+Dw2n wnpwr wp2 dmod
+Dw3p wp3 wppwr dmod
+Dw3n wnpwr wp3 dmod
+
+
+*--- Motor Control ---
+.param LipoCell = 3.7V
+.param MotorVoltage = {4 * LipoCell}
+* 5v to drive, 0v to brake
+
+* Right Motor
+Vmrppwr mrppwr 0 PWL (0 0v 1s {MotorVoltage}); .901 0v 2s 0v)
+Vmrnpwr mrnpwr 0 PWL (0 0v 1s {-MotorVoltage}); .901 0v 2s 0v)
+
+* Left Motor
+Vmlppwr mlppwr 0 PWL (0 0v 1s {MotorVoltage}); .901 0v 2s 0v)
+Vmlnpwr mlnpwr 0 PWL (0 0v 1s {-MotorVoltage}); .901 0v 2s 0v)
+
+* Weapon
+Vwppwr wppwr 0 PWL (0 0v 1s {MotorVoltage}); .901 0v 2s 0v)
+Vwnpwr wnpwr 0 PWL (0 0v 1s {-MotorVoltage}); .901 0v 2s 0v)
+
+* "on" is used to enable the "brushes": 0 disconnects, 1 connects
+* brushes to power.
+Von on 0 PWL( 0,0 10ms,0 20ms,1 .8s,1); .81s,0 1.2s,0 1.21s,1)
+ron on 0 1
+
+*--- Simulation
+.tran 10ms 2s
+.probe alli
+
+.include ./models/brushless-motor.subckt
+
+.end

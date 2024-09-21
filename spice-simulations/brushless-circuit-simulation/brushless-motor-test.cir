@@ -28,8 +28,8 @@ A2n %v(p2x) %gd(npwr p2) switchn
 A3p %v(p3x) %gd(ppwr p3) switchp
 A3n %v(p3x) %gd(npwr p3) switchn
 * 5v to drive, 0v to brake
-Vppwr ppwr 0 PWL (0 0v 1s 5v); .901 0v 2s 0v)
-Vnpwr npwr 0 PWL (0 0v 1s -5v); .901 0v 2s 0v)
+Vppwr ppwr 0 PWL (0 0v 0.2s 5v); .901 0v 2s 0v)
+Vnpwr npwr 0 PWL (0 0v 0.2s -5v); .901 0v 2s 0v)
 * Clamping diodes to keep the kickback voltage down
 D1p p1 ppwr dmod
 D1n npwr p1 dmod
