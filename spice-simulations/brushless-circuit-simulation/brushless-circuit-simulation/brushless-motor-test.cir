@@ -1,0 +1,51 @@
+* Brushless motor Test
+.options chgtol=1e-11 abstol=10u
+
+.model switchp aswitch (r_on = .1 r_off = 1e5 cntl_on= .86 cntl_off= .84 log=TRUE limit=TRUE)
+.model switchn aswitch (r_on = .1 r_off = 1e5 cntl_on=-.86 cntl_off=-.84 log=TRUE limit=TRUE)
+.model dmod D (RS = 10)
+
+.param twopi = {2*3.141596}
+.param P = 3 ; the number of phases
+.param A = 2 ;the number of north poles on the rotor
+* Connect one end of each phase winding to ct.
+x1 p1 ct p2 ct p3 ct shaft_speed shaft_angle bldcmtr
++ params: J=.30 B=.36 F=.72 D=2.9 A= {A} P= {P} CL=3mh CR=6ohm CC=.1pf
++ CM=.5 Cb=.12 Ct=300 twopi={twopi}
+rct ct 0 1 ;hook ct to ground through current measuring resistor
+* Make some brushes
+Ep1x p1x 0 VALUE = {V(on) * sin(A*V(shaft_angle) - (1-1)*(twopi/P))}
+Ep2x p2x 0 VALUE = {V(on) * sin(A*V(shaft_angle) - (2-1)*(twopi/P))}
+Ep3x p3x 0 VALUE = {V(on) * sin(A*V(shaft_angle) - (3-1)*(twopi/P))}
+r1 p1x 0 1
+r2 p2x 0 1
+r3 p3x 0 1
+
+A1p %v(p1x) %gd(ppwr p1) switchp
+A1n %v(p1x) %gd(npwr p1) switchn
+A2p %v(p2x) %gd(ppwr p2) switchp
+A2n %v(p2x) %gd(npwr p2) switchn
+A3p %v(p3x) %gd(ppwr p3) switchp
+A3n %v(p3x) %gd(npwr p3) switchn
+* 5v to drive, 0v to brake
+Vppwr ppwr 0 PWL (0 0v 1s 5v); .901 0v 2s 0v)
+Vnpwr npwr 0 PWL (0 0v 1s -5v); .901 0v 2s 0v)
+* Clamping diodes to keep the kickback voltage down
+D1p p1 ppwr dmod
+D1n npwr p1 dmod
+D2p p2 ppwr dmod
+D2n npwr p2 dmod
+D3p p3 ppwr dmod
+D3n npwr p3 dmod
+
+* "on" is used to enable the "brushes": 0 disconnects, 1 connects
+* brushes to power.
+Von on 0 PWL( 0,0 10ms,0 20ms,1 .8s,1); .81s,0 1.2s,0 1.21s,1)
+ron on 0 1
+*.watch tran V([Shaft_Speed])
+.tran 10ms 2s
+.probe alli
+
+.include ./models/brushless-motor.subckt
+
+.end
