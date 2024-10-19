@@ -1,0 +1,45 @@
+* A test circuit for the motor
+.param twopi = {2*3.141596}
+.param P = 3 ; the number of phases
+.param A = 2 ;the number of north poles on the rotor
+* Connect one end of each phase winding to ct.
+x1 p1 ct p2 ct p3 ct shaft_speed shaft_angle bldcmtr
++ params: J=3e-5 B=3.6e-5 F=7.2e-5 D=2.9e-5 A= {A} P= {P} CL=3mh CR=6ohm CC=.1pf
++ CM=.5 Cb=2e-3 Ct=3e-3 twopi={twopi}
+rct ct 0 1 ;hook ct to ground through current measuring resistor
+* Make some brushes
+Ep1x p1x 0 VALUE = {V(on) * sin(A*V(shaft_angle) - (1-1)*(twopi/P))}
+Ep2x p2x 0 VALUE = {V(on) * sin(A*V(shaft_angle) - (2-1)*(twopi/P))}
+Ep3x p3x 0 VALUE = {V(on) * sin(A*V(shaft_angle) - (3-1)*(twopi/P))}
+r1 p1x 0 1
+r2 p2x 0 1
+r3 p3x 0 1
+S1p ppwr p1 p1x 0 switchp OFF
+S1n npwr p1 p1x 0 switchn OFF
+S2p ppwr p2 p2x 0 switchp OFF 
+S2n npwr p2 p2x 0 switchn OFF
+S3p ppwr p3 p3x 0 switchp OFF
+S3n npwr p3 p3x 0 switchn OFF
+* 5v to drive, 0v to brake
+Vppwr ppwr 0 PWL 0  5v  .9  5v  .901 0v  2s 0v
+Vnpwr npwr 0 PWL 0 -5v  .9 -5v  .901 0v  2s 0v
+* Clamping diodes to keep the kickback voltage down
+D1p p1 ppwr dmod
+D1n npwr p1 dmod
+D2p p2 ppwr dmod
+D2n npwr p2 dmod
+D3p p3 ppwr dmod
+D3n npwr p3 dmod
+.model switchp vswitch (RON = .1 ROFF = 1e5 VON= .86 VOFF= .84)
+.model switchn vswitch (RON = .1 ROFF = 1e5 VON=-.86 VOFF=-.84)
+.model dmod D (RS = 10)
+* "on" is used to enable the "brushes": 0 disconnects, 1 connects
+* brushes to power.
+Von on 0 PWL  0 0  10ms 0  20ms 1  .8s 1  .81s 0  .9s 0  .91s 1
+ron on 0 1
+.tran 10ms 2s
+.PRINT TRAN FORMAT=GNUPLOT V(Shaft_Speed) V(on) V(ppwr) V(shaft_angle)
+
+.include ./bldc.mod
+
+.end
